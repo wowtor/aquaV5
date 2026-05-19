@@ -1,0 +1,30 @@
+#ifndef AQUAMQTT_CONFIGURATION_H
+#define AQUAMQTT_CONFIGURATION_H
+
+#include <Arduino.h>
+
+#include "constants.h"
+
+
+namespace aquamqtt
+{
+
+namespace config
+{
+
+constexpr OperationMode OPERATION_MODE = OperationMode::LISTENER;
+
+constexpr char     ssid[]           = "SSID";
+constexpr char     psk[]            = "PSK";
+constexpr char     brokerAddr[]     = "192.168.1.1";
+constexpr uint16_t brokerPort       = 1883;
+constexpr char     brokerClientId[] = "aquamqtt/CV5";
+
+// leave blank if your broker does not require a username/password
+constexpr char brokerUser[]     = "";
+constexpr char brokerPassword[] = "";
+
+}  // namespace config
+}  // namespace aquamqtt
+
+#endif  // AQUAMQTT_CONFIGURATION_H
