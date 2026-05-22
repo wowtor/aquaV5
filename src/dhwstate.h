@@ -5,8 +5,6 @@
 #include <map>
 #include <vector>
 
-#include <SimpleKalmanFilter.h>
-
 
 #define MAX_UNIQUE_ID_SIZE 60
 #define MAX_STATE_TOPIC_SIZE (MAX_UNIQUE_ID_SIZE+30)
@@ -77,18 +75,6 @@ public:
     void setFormat(const char* fmt);
 };
 
-class FilteredSensor: public Sensor
-{
-private:
-    SimpleKalmanFilter filter; // See: https://github.com/denyssene/SimpleKalmanFilter
-public:
-
-    FilteredSensor(DhwState* device_id, const char* entity_id, const char* name, bool is_diagnostic);
-    virtual ~FilteredSensor() = default;
-
-    virtual void set_value(const float new_value);
-};
-
 
 class DhwState final
 {
@@ -99,15 +85,18 @@ private:
 public:
     static DhwState& getInstance();
 
+    DhwState(DhwState const&) = delete;
+    void operator=(DhwState const&) = delete;
+
     inline const char* getDeviceId() const { return device_id.c_str(); };
     inline const char* getDeviceName() const { return device_name.c_str(); };
 
-    Sensor* water_temperature;
-    Sensor* compressor_outlet_temperature;
-    Sensor* air_inlet_temperature;
-    Sensor* evaporator1_temperature;
-    Sensor* evaporator2_temperature;
-    Sensor* evaporator3_temperature;
+    Sensor *water_temperature, *water_temperature_min, *water_temperature_max;
+    Sensor *compressor_outlet_temperature, *compressor_outlet_temperature_min, *compressor_outlet_temperature_max;
+    Sensor *air_inlet_temperature, *air_inlet_temperature_min, *air_inlet_temperature_max;
+    Sensor *evaporator1_temperature;
+    Sensor *evaporator2_temperature;
+    Sensor *evaporator3_temperature;
 
     BinarySensor* input_i2;
     BinarySensor* input_i1;

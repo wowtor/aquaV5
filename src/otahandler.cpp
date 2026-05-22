@@ -3,6 +3,7 @@
 #include <ArduinoOTA.h>
 
 #include "config.h"
+#include "util.h"
 
 
 namespace aquamqtt
@@ -15,7 +16,7 @@ void OTAHandler::setup()  // NOLINT(*-convert-member-functions-to-static)
     // ArduinoOTA.setPort(3232);
 
     // Hostname defaults to esp3232-[MAC]
-    ArduinoOTA.setHostname(DEVICE_ID);
+    ArduinoOTA.setHostname(unique_device_id());
 
     // No authentication by default
     // ArduinoOTA.setPassword("admin");

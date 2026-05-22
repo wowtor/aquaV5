@@ -2,13 +2,19 @@
 
 #include <cstring>
 
+#include <SimpleKalmanFilter.h>
+
 #include "constants.h"
-#include "config.h"
-#include "util.h"
 #include "mqtttask.h"
+#include "util.h"
 
 namespace aquamqtt
 {
+
+#define STATE_UNKNOWN "unknown"
+#define STATE_BINARY_ON "on"
+#define STATE_BINARY_OFF "off"
+
 
 /*** ENTITY ***/
 
@@ -18,15 +24,15 @@ Entity::Entity(DhwState* _device, const char* _entity_id, const char* _name, boo
     , name(_name)
     , is_diagnostic(_is_diagnostic)
 {
-    snprintf(unique_id, MAX_UNIQUE_ID_SIZE, "%s_%s", _device->getDeviceId(), _entity_id);
+    snprintf(unique_id, MAX_UNIQUE_ID_SIZE, "%s_%s", unique_device_id(), _entity_id);
     snprintf(state_topic, MAX_STATE_TOPIC_SIZE, "homeassistant/%s/state", unique_id);
     
-    _def.insert({"unique_id", unique_id});
+    _def.insert({"uniq_id", unique_id}); // unique_id
     _def.insert({"name", name});
-    _def.insert({"state_topic", state_topic});
+    _def.insert({"stat_t", state_topic}); // state_topic
 
     if (is_diagnostic) {
-        _def.insert({"entity_category", "diagnostic"});
+        _def.insert({"ent_cat", "diagnostic"}); // entity_category
     }
 }
 
@@ -35,7 +41,7 @@ const char* Entity::state()
     if (_has_value) {
         return _state.c_str();
     } else {
-        return nullptr;
+        return STATE_UNKNOWN;
     }
 }
 
@@ -78,7 +84,7 @@ BinarySensor::BinarySensor(DhwState* _device, const char* _entity_id, const char
 void BinarySensor::set_value(const bool new_value)
 {
     value = new_value;
-    update_state(value ? "on" : "off");
+    update_state(value ? STATE_BINARY_ON : STATE_BINARY_OFF);
 }
 
 /*** SENSOR ***/
@@ -86,9 +92,9 @@ void BinarySensor::set_value(const bool new_value)
 Sensor::Sensor(DhwState* _device, const char* _entity_id, const char* _name, bool _is_diagnostic)
     : Entity(_device, _entity_id, _name, _is_diagnostic)
 {
-    _def.insert({"p", "sensor"});
-    _def.insert({"device_class", "temperature"});
-    _def.insert({"unit_of_measurement", "°C"});
+    _def.insert({"p", "sensor"}); // platform
+    _def.insert({"dev_cla", "temperature"}); // device_class
+    _def.insert({"unit_of_meas", "°C"}); // unit_of_measurement
 }
 
 void Sensor::set_value(const float new_value)
@@ -109,14 +115,22 @@ void Sensor::setFormat(const char* fmt)
 
 /*** FILTEREDSENSOR ***/
 
+class FilteredSensor: public Sensor
+{
+private:
+    SimpleKalmanFilter filter; // See: https://github.com/denyssene/SimpleKalmanFilter
+public:
+
+    FilteredSensor(DhwState* device_id, const char* entity_id, const char* name, bool is_diagnostic);
+    virtual ~FilteredSensor() = default;
+
+    virtual void set_value(const float new_value);
+};
+
 FilteredSensor::FilteredSensor(DhwState* _device, const char* _entity_id, const char* _name, bool _is_diagnostic)
     : Sensor(_device, _entity_id, _name, _is_diagnostic)
     , filter(config::KALMAN_MEA_E, config::KALMAN_EST_E, config::KALMAN_Q)
 {
-    _def.insert({"p", "sensor"});
-    _def.insert({"device_class", "temperature"});
-    _def.insert({"unit_of_measurement", "°C"});
-
     setFormat("%.1f");
 }
 
@@ -129,7 +143,7 @@ void FilteredSensor::set_value(const float new_value)
 /*** DHWSTATE ***/
 
 DhwState& DhwState::getInstance() {
-    static DhwState instance(DEVICE_ID, DEVICE_NAME);
+    static DhwState instance(unique_device_id(), DEVICE_NAME);
     return instance;
 }
 
@@ -139,11 +153,21 @@ DhwState::DhwState(const char* _device_id, const char* _device_name)
 {
     entities = {
         water_temperature = new FilteredSensor(this, "water_temperature", "Water Temperature", false),
+        water_temperature_min = new Sensor(this, "water_temperature_min", "Water Temperature (min)", true),
+        water_temperature_max = new Sensor(this, "water_temperature_max", "Water Temperature (max)", true),
+
         compressor_outlet_temperature = new FilteredSensor(this, "compressor_outlet_temperature", "Compressor Outlet Temperature", true),
+        compressor_outlet_temperature_min = new Sensor(this, "compressor_outlet_temperature_min", "Compressor Outlet Temperature (min)", true),
+        compressor_outlet_temperature_max = new Sensor(this, "compressor_outlet_temperature_max", "Compressor Outlet Temperature (max)", true),
+
         air_inlet_temperature = new FilteredSensor(this, "air_inlet_temperature", "Air inlet Temperature", true),
+        air_inlet_temperature_min = new Sensor(this, "air_inlet_temperature_min", "Air inlet Temperature (min)", true),
+        air_inlet_temperature_max = new Sensor(this, "air_inlet_temperature_max", "Air inlet Temperature (max)", true),
+
         evaporator1_temperature = new FilteredSensor(this, "evaporator1_temperature", "Evaporator1 Temperature", true),
         evaporator2_temperature = new FilteredSensor(this, "evaporator2_temperature", "Evaporator2 Temperature", true),
         evaporator3_temperature = new FilteredSensor(this, "evaporator3_temperature", "Evaporator3 Temperature", true),
+
         input_i2 = new BinarySensor(this, "input_i2", "Input I2", true),
         input_i1 = new BinarySensor(this, "input_i1", "Input I1", true),
         heating_active = new BinarySensor(this, "heating_active", "Heating Active", false)

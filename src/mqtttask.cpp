@@ -7,6 +7,7 @@
 #include "wifihandler.h"
 #include "util.h"
 
+
 namespace aquamqtt
 {
 
@@ -144,12 +145,7 @@ void MqttTask::connect()
 
 void MqttTask::publishEntityState(Entity &entity)
 {
-    const char* state = entity.state();
-    if (state == nullptr) {
-        client.publish(entity.getStateTopic(), "", false, 0);
-    } else {
-        client.publish(entity.getStateTopic(), state, false, 0);
-    }
+    client.publish(entity.getStateTopic(), entity.state(), true, 0);
 }
 
 void MqttTask::publishEntityDiscovery(Entity &entity)
@@ -161,17 +157,28 @@ void MqttTask::publishEntityDiscovery(Entity &entity)
 
     std::stringstream s;
     s << "{";
+
+    // entity info
     for (auto it = def.begin(); it != def.end(); it++) {
-        s << "\"" << it->first << "\": \"" << it->second << "\"";
+        s << "\"" << it->first << "\":\"" << it->second << "\"";
         if (it != def.end()) {
-            s << ", ";
+            s << ",";
         }
     }
-    s << "\"device\":{";
-    s << "\"identifiers\":[\"" << entity.getDevice().getDeviceId() << "\"]";
+
+    // device info
+    s << "\"dev\":{"; // device
+    s << "\"ids\":\"" << entity.getDevice().getDeviceId() << "\""; // identifiers
     s << ",";
-    s << "\"name\": \"" << entity.getDevice().getDeviceName() << "\"";
-    s << "}}";
+    s << "\"name\":\"" << entity.getDevice().getDeviceName() << "\"";
+    s << "},";
+
+    // origin info
+    s << "\"o\":{";
+    s << "\"name\":\"" << APP_NAME << "\"";
+    s << "}";
+
+    s << "}";
 
     LOG.print("[mqtt] discovery ");
     LOG.print(topic);
@@ -205,7 +212,7 @@ void publishFrameQueue(MQTTClient& client, std::queue<Frame>& queue, const char*
         auto frame = queue.front();
 
         char topic[100];
-        snprintf(topic, 100, "%s/debug/%s/%s", DEVICE_ID, queue_name, channel_name(frame.getChannel()));
+        snprintf(topic, 100, "%s/debug/%s/%s", unique_device_id(), queue_name, channel_name(frame.getChannel()));
 
         char hex[MAX_FRAME_SIZE * 2 + 1];
         for (int i=0 ; i<frame.get_buffer_size() ; i++) {

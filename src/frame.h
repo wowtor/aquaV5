@@ -1,3 +1,12 @@
+/**
+ * A frame is formatted as follows:
+ * - byte 0: always 0x01
+ * - byte 1: 0x64 or 0x65
+ * - byte 2-5: message type
+ * - byte 6 (optional): payload length
+ * - byte 7+ (optional): payload
+ * - last two bytes: checksum
+ */
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
@@ -5,11 +14,11 @@
 #include <string>
 
 #include "constants.h"
-#include "util.h"
 
+// the number of bytes in the header
 #define HEADER_LENGTH 5
 
-// longest message is 5 (header) + 17 (payload) + 2 (crc)
+// longest message observed is 29 = 5 (header) + 22 (payload) + 2 (crc)
 #define MAX_FRAME_SIZE 29
 
 
@@ -21,15 +30,19 @@ class Frame final
 {
 private:
     FrameChannel mChannel;
-    uint8_t buffer[MAX_FRAME_SIZE];
+    uint8_t buffer[MAX_FRAME_SIZE]; // the full message, including CRC
     uint8_t buffer_size;
 
 public:
     inline FrameChannel getChannel() const { return mChannel; };
+
+    // a friendly name for the serial interface (listener, hmi, main)
     const char* getChannelName() const;
 
     const uint8_t* payload() const;
     int payload_size() const;
+
+    // the header as a single int
     uint64_t getHeaderValue() const;
 
     const uint8_t* get_buffer() const;

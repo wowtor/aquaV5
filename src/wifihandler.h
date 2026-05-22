@@ -11,6 +11,9 @@ class WifiHandler final
 public:
     static WifiHandler& getInstance();
 
+    WifiHandler(WifiHandler const&) = delete;
+    void operator=(WifiHandler const&) = delete;
+
     void setup();
     void loop();
 

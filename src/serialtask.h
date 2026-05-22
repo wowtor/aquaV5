@@ -41,6 +41,9 @@ public:
     static SerialTask& getControllerInstance();
     static SerialTask& getListenerInstance();
 
+    SerialTask(SerialTask const&) = delete;
+    void operator=(SerialTask const&) = delete;
+
     void queueSendFrame(const Frame &message);
     void sendByte(const uint8_t value);
 

@@ -23,6 +23,8 @@ std::string format_string( const std::string& format, Args ... args )
 
 const char* channel_name(FrameChannel channel);
 
+const char* unique_device_id();
+
 }
 
 #endif // AQUAMQTT_UTIL_H

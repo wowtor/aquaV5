@@ -10,7 +10,8 @@ namespace aquamqtt
 
 #define LOG Serial
 
-#define DEVICE_ID "v5alt"
+#define APP_NAME "AquaV5"
+
 #define DEVICE_NAME "DHW"
 
 #define HMI_TASK_NAME "hmi"

@@ -1,6 +1,7 @@
 #include "protocol.h"
 
 #include "dhwstate.h"
+#include "util.h"
 
 
 namespace aquamqtt {
@@ -32,6 +33,15 @@ bool check_payload_size(const Frame &frame, int expected_size, const char* frame
 }
 
 void process_temperature_frame(DhwState &state, const Frame &frame) {
+    /**
+     * byte 0-1: water temperature
+     * byte 2-3: compressor outlet temperature
+     * byte 4-5: air inlet temperature
+     * byte 6-7: evaporator 1 temperature
+     * byte 8-9: evaporator 2 temperature
+     * byte 10-11: evaporator 3 temperature
+     */
+
     if (!check_payload_size(frame, 12, "temperature")) {
         return;
     }
@@ -45,8 +55,36 @@ void process_temperature_frame(DhwState &state, const Frame &frame) {
     state.evaporator3_temperature->set_value(parse_temperature(&payload[10]));
 }
 
+void process_extreme_temperature_frame(const Frame &frame, Sensor* min, Sensor* max) {
+    /**
+     * byte 0 is always 00
+     * byte 1-2 is the smallest value
+     * byte 3-4 is the greatest value
+     */
+
+     if (!check_payload_size(frame, 5, "temperature")) {
+        return;
+    }
+
+    const uint8_t* payload = frame.payload();
+
+    if (payload[0] != 0x00) {
+        LOG.print(format_string("[%s] invalid frame: extreme temperature: first payload byte should be 0; found: %02x", frame.getChannelName(), payload[0]).c_str());
+        return;
+    }
+
+    min->set_value(parse_temperature(&payload[1]));
+    max->set_value(parse_temperature(&payload[3]));
+}
+
 void process_input_frame(DhwState &state, const Frame &frame) {
-    if (!check_payload_size(frame, 3, "input")) {
+    /**
+     * byte 0: boolean value for input I2 (0=no signal; 1=signal)
+     * byte 1: boolean value for input I1 (0=no signal; 1=signal)
+     * byte 2: boolean value for heating active (0=idle; 1=heating)
+     */
+
+     if (!check_payload_size(frame, 3, "input")) {
         return;
     }
 
@@ -67,6 +105,66 @@ void process_frame(const Frame &frame)
         break;
     case 0x0164FF1403:
         process_input_frame(state, frame);
+        break;
+    case 0x0164FEBA03:
+        process_extreme_temperature_frame(frame, state.water_temperature_min, state.water_temperature_max);
+        break;
+    case 0x0164FEBD03:
+        process_extreme_temperature_frame(frame, state.compressor_outlet_temperature_min, state.compressor_outlet_temperature_max);
+        break;
+    case 0x0164FEC003:
+        process_extreme_temperature_frame(frame, state.air_inlet_temperature_min, state.air_inlet_temperature_max);
+        break;
+    case 0x0164FEC303:
+        // process_extreme_temperature_frame: evaporator1
+        break;
+    case 0x0164FEC603:
+        // process_extreme_temperature_frame: evaporator2
+        break;
+    case 0x0164FEC903:
+        // process_extreme_temperature_frame: evaporator3
+        break;
+    case 0x0164FEE203:
+        // counter1
+        break;
+    case 0x0164FEE503:
+        // counter2
+        break;
+    case 0x0164FEE803:
+        // counter3
+        break;
+    case 0x0164FEEB03:
+        // counter4
+        break;
+    case 0x0164FEEE03:
+        // counter5
+        break;
+    case 0x0164FEF103:
+        // counter6
+        break;
+    case 0x0165FEF701:
+        // unknown message
+        break;
+    case 0x0165FEF901:
+        // unknown message
+        break;
+    case 0x0165FEFB01:
+        // unknown message
+        break;
+    case 0x0165FEFD01:
+        // unknown message
+        break;
+    case 0x0165FEFF01:
+        // unknown message
+        break;
+    case 0x0165FF0101:
+        // unknown message
+        break;
+    case 0x0165FF0301:
+        // unknown message
+        break;
+    case 0x016516B301:
+        // unknown message
         break;
     }
 }

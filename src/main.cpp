@@ -48,6 +48,8 @@ void loop()
 
 void setup()
 {
+    delay(2000);
+
     // limited serial output for debuggability
     Serial.begin(9600);
     Serial.println("REBOOT");

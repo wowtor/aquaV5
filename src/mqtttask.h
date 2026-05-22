@@ -36,6 +36,9 @@ private:
 public:
     static MqttTask& getInstance();
 
+    MqttTask(MqttTask const&) = delete;
+    void operator=(MqttTask const&) = delete;
+
     void queueUpdateEntity(Entity* entity);
 
     #ifdef MQTT_PUBLISH_FRAMES

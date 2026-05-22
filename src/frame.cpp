@@ -1,6 +1,8 @@
+#include "frame.h"
+
 #include <cstring>
 
-#include "frame.h"
+#include "util.h"
 #include "constants.h"
 
 namespace aquamqtt {
