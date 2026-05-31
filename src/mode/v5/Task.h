@@ -19,7 +19,7 @@ protected:
 
     void log_line(const char* msg) const;
 
-    virtual void periodicUpdate() const;
+    virtual void periodicUpdate();
 private:
     [[noreturn]] static void innerTask(void* pvParameters);
 

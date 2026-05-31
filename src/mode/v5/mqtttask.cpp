@@ -3,7 +3,7 @@
 #include <esp_task_wdt.h>
 #include <sstream>
 
-#include "config.h"
+#include "config/Configuration.h"
 #include "wifihandler.h"
 #include "util.h"
 

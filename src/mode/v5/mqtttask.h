@@ -47,8 +47,8 @@ public:
     void queueDroppedBytes(const Frame& frame);
     #endif
 
-    void setup();
-    void loop();
+    void setup() override;
+    void loop() override;
 
 private:
     static void messageReceived(const String& topic, const String& payload);

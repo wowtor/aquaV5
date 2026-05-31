@@ -46,11 +46,11 @@ public:
     void queueSendFrame(const Frame &message);
     void sendByte(const uint8_t value);
 
-    void setup();
-    void loop();
+    void setup() override;
+    void loop() override;
 
 protected:
-    virtual void periodicUpdate();
+    virtual void periodicUpdate() override;
 };
 }  // namespace aquamqtt
 

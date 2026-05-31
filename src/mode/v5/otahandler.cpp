@@ -2,7 +2,7 @@
 
 #include <ArduinoOTA.h>
 
-#include "config.h"
+#include "config/Configuration.h"
 #include "util.h"
 
 

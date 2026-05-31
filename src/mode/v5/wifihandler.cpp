@@ -1,7 +1,7 @@
 #include "wifihandler.h"
 
 #include "constants.h"
-#include "config.h"
+#include "config/Configuration.h"
 
 
 namespace aquamqtt

@@ -55,7 +55,7 @@ void Task::log_line(const char* msg) const
     LOG.println(msg);
 }
 
-void Task::periodicUpdate() const
+void Task::periodicUpdate()
 {
     LOG.print("[");
     LOG.print(taskName);

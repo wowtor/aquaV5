@@ -2,7 +2,7 @@
 
 #include <esp_task_wdt.h>
 
-#include "config.h"
+#include "config/Configuration.h"
 #include "util.h"
 
 
@@ -14,12 +14,12 @@ namespace aquamqtt
 /*** SERIALTASK PUBLIC ***/
 
 SerialTask& SerialTask::getHMIInstance() {
-    static SerialTask instance(FrameChannel::CH_HMI, &Serial1, config::GPIO_HMI_RX, config::GPIO_HMI_TX, config::GPIO_HMI_ENABLE_TX);
+    static SerialTask instance(FrameChannel::CH_HMI, &Serial1, config::GPIO_HMI_RX, config::GPIO_HMI_TX, config::GPIO_ENABLE_TX_HMI);
     return instance;
 }
 
 SerialTask& SerialTask::getControllerInstance() {
-    static SerialTask instance(FrameChannel::CH_MAIN, &Serial2, config::GPIO_MAIN_RX, config::GPIO_MAIN_TX, config::GPIO_MAIN_ENABLE_TX);
+    static SerialTask instance(FrameChannel::CH_MAIN, &Serial2, config::GPIO_MAIN_RX, config::GPIO_MAIN_TX, config::GPIO_ENABLE_TX_MAIN);
     return instance;
 }
 
@@ -50,8 +50,8 @@ void SerialTask::setup()
 {
     Task::setup();
 
-    LOG.println(getName());
-    _port->begin(config::DEFAULT_SERIAL_BAUD, config::DEFAULT_SERIAL_CONFIGURATION, _gpio_rx, _gpio_tx);
+    log_line(getName());
+    _port->begin(38400, SERIAL_8N1, _gpio_rx, _gpio_tx);
     if (_gpio_enable_tx) {
         pinMode(_gpio_enable_tx, OUTPUT);
     }
@@ -60,8 +60,6 @@ void SerialTask::setup()
 void SerialTask::loop()
 {
     Task::loop();
-
-    const bool printSerialStats   = (millis() - last_statistics_update_timestamp) >= 5000;
 
     while (_port->available())
     {

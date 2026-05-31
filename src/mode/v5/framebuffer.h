@@ -5,7 +5,6 @@
 
 #include "constants.h"
 #include "frame.h"
-#include "config.h"
 
 namespace aquamqtt{
 
