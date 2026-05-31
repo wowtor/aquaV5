@@ -1,10 +1,21 @@
 #include "protocol.h"
 
+#include <FastCRC.h>
+
 #include "dhwstate.h"
 #include "util.h"
 
 
 namespace aquamqtt {
+
+bool check_crc(const uint8_t* frame, const uint8_t len)
+{
+    static FastCRC16 mCRC;
+
+    uint16_t actualCRC  = mCRC.modbus(frame, len - 2);
+    uint16_t messageCRC = frame[len-1] << 8 | frame[len-2];
+    return messageCRC == actualCRC;
+}
 
 float parse_temperature(const uint8_t* bytes)
 {

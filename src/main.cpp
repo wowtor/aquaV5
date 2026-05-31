@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <esp_task_wdt.h>
 
-#include "config.h"
+#include "config/Configuration.h"
 
 #include "handler/Wifi.h"
 #include "mode/v5/serialtask.h"
@@ -38,12 +38,7 @@ void loop()
     MqttTask::getInstance().loop();
 
     // handle serial interfaces
-    if (OPERATION_MODE == EOperationMode::V5_LISTENER) {
-        SerialTask::getListenerInstance().loop();
-    } else {
-        SerialTask::getHMIInstance().loop();
-        SerialTask::getControllerInstance().loop();
-    }
+    SerialTask::getInstance().loop();
 }
 
 void setup()
@@ -69,10 +64,5 @@ void setup()
     MqttTask::getInstance().setup();
 
     // setup serial interfaces
-    if (OPERATION_MODE == EOperationMode::V5_LISTENER) {
-        SerialTask::getListenerInstance().setup();
-    } else {
-        SerialTask::getHMIInstance().setup();
-        SerialTask::getControllerInstance().setup();
-    }
+    SerialTask::getInstance().setup();
 }

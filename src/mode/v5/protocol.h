@@ -6,6 +6,8 @@
 
 namespace aquamqtt{
 
+bool check_crc(const uint8_t* frame, const uint8_t len);
+
 void process_frame(const Frame &frame);
 
 }
