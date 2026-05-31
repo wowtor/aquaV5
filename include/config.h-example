@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "constants.h"
+#include "mode/v5/constants.h"
 
 
 namespace aquamqtt

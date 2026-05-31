@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <esp_task_wdt.h>
-#include <Preferences.h>
 
 #include "config.h"
-#include "wifihandler.h"
-#include "serialtask.h"
-#include "mqtttask.h"
-#include "otahandler.h"
+
+#include "mode/v5/wifihandler.h"
+#include "mode/v5/serialtask.h"
+#include "mode/v5/mqtttask.h"
+#include "mode/v5/otahandler.h"
 
 
 using namespace aquamqtt;
