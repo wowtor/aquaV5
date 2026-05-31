@@ -4,7 +4,7 @@
 #include "config/Configuration.h"
 
 #include "handler/Wifi.h"
-#include "mode/v5/serialtask.h"
+#include "mode/v5/V5ListenerTask.h"
 #include "mode/v5/mqtttask.h"
 #include "handler/OTA.h"
 
@@ -38,7 +38,7 @@ void loop()
     MqttTask::getInstance().loop();
 
     // handle serial interfaces
-    SerialTask::getInstance().loop();
+    V5ListenerTask::getInstance().loop();
 }
 
 void setup()
@@ -64,5 +64,5 @@ void setup()
     MqttTask::getInstance().setup();
 
     // setup serial interfaces
-    SerialTask::getInstance().setup();
+    V5ListenerTask::getInstance().setup();
 }

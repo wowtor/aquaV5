@@ -1,9 +1,8 @@
-#ifndef AQUAMQTT_SERIALTASK_H
-#define AQUAMQTT_SERIALTASK_H
+#ifndef AQUAMQTT_V5_LISTENER_TASK_H
+#define AQUAMQTT_V5_LISTENER_TASK_H
 
 #include <queue>
 
-#include "serialtask.h"
 #include "frame.h"
 #include "Task.h"
 #include "constants.h"
@@ -44,7 +43,7 @@ public:
 };
 
 
-class SerialTask final : public Task
+class V5ListenerTask final : public Task
 {
 private:
     HardwareSerial *_port;
@@ -59,16 +58,16 @@ private:
 
     unsigned long        last_statistics_update_timestamp;
 
-    SerialTask(HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx);
-    ~SerialTask() = default;
+    V5ListenerTask(HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx);
+    ~V5ListenerTask() = default;
 
     void writeQueuedMessages();
 
 public:
-    static SerialTask& getInstance();
+    static V5ListenerTask& getInstance();
 
-    SerialTask(SerialTask const&) = delete;
-    void operator=(SerialTask const&) = delete;
+    V5ListenerTask(V5ListenerTask const&) = delete;
+    void operator=(V5ListenerTask const&) = delete;
 
     void queueSendFrame(const Frame &message);
     void sendByte(const uint8_t value);
@@ -81,4 +80,4 @@ protected:
 };
 }  // namespace aquamqtt
 
-#endif  // AQUAMQTT_SERIALTASK_H
+#endif  // AQUAMQTT_V5_LISTENER_TASK_H

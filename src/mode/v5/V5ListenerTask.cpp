@@ -1,10 +1,9 @@
-#include "serialtask.h"
+#include "V5ListenerTask.h"
 
 #include <esp_task_wdt.h>
 
 #include "config/Configuration.h"
 #include "util.h"
-#include "serialtask.h"
 #include "mqtttask.h"
 #include "protocol.h"
 
@@ -149,12 +148,12 @@ Frame * FrameBuffer::handleFrame()
 
 /*** SERIALTASK PUBLIC ***/
 
-SerialTask& SerialTask::getInstance() {
-    static SerialTask instance(&Serial2, config::GPIO_MAIN_RX, 0, 0);
+V5ListenerTask& V5ListenerTask::getInstance() {
+    static V5ListenerTask instance(&Serial2, config::GPIO_MAIN_RX, 0, 0);
     return instance;
 }
 
-void SerialTask::queueSendFrame(const Frame &frame) {
+void V5ListenerTask::queueSendFrame(const Frame &frame) {
     if (xSemaphoreTake(write_queue_mutex, portMAX_DELAY)) {
         if (write_queue.size() >= WRITE_QUEUE_SIZE) {
             write_queue.pop();
@@ -165,14 +164,14 @@ void SerialTask::queueSendFrame(const Frame &frame) {
     }
 }
 
-void SerialTask::sendByte(const uint8_t value) {
+void V5ListenerTask::sendByte(const uint8_t value) {
     digitalWrite(_gpio_enable_tx, HIGH);
     _port->write(value);
     _port->flush();
     digitalWrite(_gpio_enable_tx, LOW);
 }
 
-void SerialTask::setup()
+void V5ListenerTask::setup()
 {
     Task::setup();
 
@@ -183,7 +182,7 @@ void SerialTask::setup()
     }
 }
 
-void SerialTask::loop()
+void V5ListenerTask::loop()
 {
     Task::loop();
 
@@ -198,7 +197,7 @@ void SerialTask::loop()
 
 /*** SERIALTASK PROTECTED ***/
 
-void SerialTask::periodicUpdate()
+void V5ListenerTask::periodicUpdate()
 {
     Task::periodicUpdate();
 
@@ -224,7 +223,7 @@ void SerialTask::periodicUpdate()
 
 /*** SERIALTASK PRIVATE ***/
 
-SerialTask::SerialTask(HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx)
+V5ListenerTask::V5ListenerTask(HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx)
     : Task("listener")
     , _port((HardwareSerial*)port)
     , _gpio_rx(gpio_rx)
@@ -236,7 +235,7 @@ SerialTask::SerialTask(HardwareSerial *port, const uint8_t gpio_rx, const uint8_
     write_queue_mutex = xSemaphoreCreateMutex();
 }
 
-void SerialTask::writeQueuedMessages() {
+void V5ListenerTask::writeQueuedMessages() {
     if (!_gpio_enable_tx) {
         return;
     }
