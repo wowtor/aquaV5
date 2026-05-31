@@ -9,13 +9,14 @@
 
 #include "frame.h"
 #include "dhwstate.h"
+#include "Task.h"
 
 #define DROPPED_SIZE 160
 
 namespace aquamqtt
 {
 
-class MqttTask final
+class MqttTask final : public Task
 {
 private:
     const char* host;
@@ -46,12 +47,10 @@ public:
     void queueDroppedBytes(const Frame& frame);
     #endif
 
-    void spawn();
     void setup();
     void loop();
 
 private:
-    [[noreturn]] static void innerTask(void* pvParameters);
     static void messageReceived(const String& topic, const String& payload);
 
     MqttTask(const char* host, int port);

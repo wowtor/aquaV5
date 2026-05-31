@@ -8,11 +8,12 @@
 #include "serialtask.h"
 #include "framebuffer.h"
 #include "frame.h"
+#include "Task.h"
 
 namespace aquamqtt
 {
 
-class SerialTask final
+class SerialTask final : public Task
 {
 private:
     FrameChannel _channel;
@@ -27,8 +28,6 @@ private:
     SemaphoreHandle_t  write_queue_mutex;
 
     unsigned long        last_statistics_update_timestamp;
-
-    [[noreturn]] static void innerTask(void* pvParameters);
 
     SerialTask(FrameChannel channel, HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx);
     ~SerialTask() = default;
@@ -47,9 +46,11 @@ public:
     void queueSendFrame(const Frame &message);
     void sendByte(const uint8_t value);
 
-    void spawn();
     void setup();
     void loop();
+
+protected:
+    virtual void periodicUpdate();
 };
 }  // namespace aquamqtt
 

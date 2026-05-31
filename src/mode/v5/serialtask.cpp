@@ -46,16 +46,10 @@ void SerialTask::sendByte(const uint8_t value) {
     digitalWrite(_gpio_enable_tx, LOW);
 }
 
-void SerialTask::spawn()
-{
-    TaskHandle_t handle;
-    xTaskCreate(SerialTask::innerTask, getName(), 3000, this, 4, &handle);
-    //esp_task_wdt_add(handle);
-}
-
 void SerialTask::setup()
 {
-    LOG.print("[serial] setup channel: ");
+    Task::setup();
+
     LOG.println(getName());
     _port->begin(config::DEFAULT_SERIAL_BAUD, config::DEFAULT_SERIAL_CONFIGURATION, _gpio_rx, _gpio_tx);
     if (_gpio_enable_tx) {
@@ -65,6 +59,8 @@ void SerialTask::setup()
 
 void SerialTask::loop()
 {
+    Task::loop();
+
     const bool printSerialStats   = (millis() - last_statistics_update_timestamp) >= 5000;
 
     while (_port->available())
@@ -74,48 +70,39 @@ void SerialTask::loop()
     }
 
     writeQueuedMessages();
+}
 
-    if (printSerialStats)
-    {
-        LOG.print("[");
-        LOG.print(getName());
-        LOG.print("] messages received: ");
-        LOG.print(buffer.countFramesReceived());
-        LOG.print("; checksums errors: ");
-        LOG.print(buffer.countChecksumErrors());
-        LOG.print("; long messages: ");
-        LOG.print(buffer.countLongFrameErrors());
-        LOG.print("; buffer full: ");
-        LOG.print(buffer.countBufferFullErrors());
-        LOG.print("; no magic: ");
-        LOG.print(buffer.countNoMagicErrors());
-        LOG.println();
+/*** SERIALTASK PROTECTED ***/
 
-        LOG.print("[serial] stack size: ");
-        LOG.print(uxTaskGetStackHighWaterMark(nullptr));
-        LOG.print("; minimum ever heep size: ");
-        LOG.println(xPortGetMinimumEverFreeHeapSize());
+void SerialTask::periodicUpdate()
+{
+    Task::periodicUpdate();
 
-        last_statistics_update_timestamp = millis();
-    }
+    LOG.print("[");
+    LOG.print(getName());
+    LOG.print("] messages received: ");
+    LOG.print(buffer.countFramesReceived());
+    LOG.print("; checksums errors: ");
+    LOG.print(buffer.countChecksumErrors());
+    LOG.print("; long messages: ");
+    LOG.print(buffer.countLongFrameErrors());
+    LOG.print("; buffer full: ");
+    LOG.print(buffer.countBufferFullErrors());
+    LOG.print("; no magic: ");
+    LOG.print(buffer.countNoMagicErrors());
+    LOG.println();
+
+    LOG.print("[serial] stack size: ");
+    LOG.print(uxTaskGetStackHighWaterMark(nullptr));
+    LOG.print("; minimum ever heep size: ");
+    LOG.println(xPortGetMinimumEverFreeHeapSize());
 }
 
 /*** SERIALTASK PRIVATE ***/
 
-[[noreturn]] void SerialTask::innerTask(void* pvParameters)
-{
-    auto* self = (SerialTask*) pvParameters;
-
-    self->setup();
-    while (true)
-    {
-        //esp_task_wdt_reset();
-        self->loop();
-    }
-}
-
 SerialTask::SerialTask(FrameChannel channel, HardwareSerial *port, const uint8_t gpio_rx, const uint8_t gpio_tx, const uint8_t gpio_enable_tx)
-    : _channel(channel)
+    : Task("serial")
+    , _channel(channel)
     , _port((HardwareSerial*)port)
     , _gpio_rx(gpio_rx)
     , _gpio_tx(gpio_tx)

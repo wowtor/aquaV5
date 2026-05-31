@@ -51,22 +51,18 @@ void MqttTask::queueDroppedBytes(const Frame& frame) {
 }
 #endif
 
-void MqttTask::spawn()
-{
-    TaskHandle_t handle;
-    xTaskCreate(MqttTask::innerTask, "mqtt", 3000, this, 4, &handle);
-    //esp_task_wdt_add(handle);
-}
-
 void MqttTask::setup()
 {
-    LOG.println("[mqtt] setup...");
+    Task::setup();
+
     client.begin(host, port, net);
     client.onMessage(MqttTask::messageReceived);
 }
 
 void MqttTask::loop()
 {
+    Task::loop();
+
     client.loop();
 
     if (!client.connected()) {
@@ -86,36 +82,17 @@ void MqttTask::loop()
     #endif
 
     const bool print_stats = (millis() - last_statistics_update_timestamp) >= 5000;
-
-    if (print_stats)
-    {
-        LOG.print("[mqtt] stack size: ");
-        LOG.print(uxTaskGetStackHighWaterMark(nullptr));
-        LOG.print("; minimum ever heep size: ");
-        LOG.println(xPortGetMinimumEverFreeHeapSize());
-
-        last_statistics_update_timestamp = millis();
-    }
 }
 
 /*** MQTTTASK PRIVATE ***/
-
-[[noreturn]] void MqttTask::innerTask(void* pvParameters)
-{
-    auto* self = (MqttTask*) pvParameters;
-
-    self->setup();
-    while (true) {
-        self->loop();
-    }
-}
 
 void MqttTask::messageReceived(const String& topic, const String& payload)
 {
 }
 
 MqttTask::MqttTask(const char* _host, int _port)
-    : host(_host)
+    : Task("mqtt")
+    , host(_host)
     , port(_port)
     , client(256)
 {
