@@ -2,6 +2,7 @@
 #define AQUAMQTT_CONSTANTS_H
 
 #include <Arduino.h>
+#include "message/MessageConstants.h"
 
 namespace aquamqtt
 {
@@ -18,31 +19,7 @@ namespace aquamqtt
 #define CONTROLLER_TASK_NAME "controller"
 #define LISTENER_TASK_NAME "listener"
 
-enum class FrameChannel
-{
-    CH_LISTENER,
-    CH_MAIN,
-    CH_HMI
-};
-
-enum OperationMode
-{
-    /**
-     *  AquaMqtt is acting as Listener and is connected to a single physical one-wire USART instance:
-     * - Reads traffic from the HMI and MAIN Controller
-     * - Parses and publishes DHW messages to MQTT
-     */
-    LISTENER,
-
-    /**
-     * AquaMqtt is acting as Man-In-The-Middle and is connected to two physical one-wire USART instances:
-     * - Forwards data from the HMI Controller to the MAIN Controller
-     * - Forwards data from the MAIN Controller to the HMI Controller
-     * - Possibility to overwrite dedicated fields in the messages from HMI to Main Controller
-     * - Parses and publishes DHW messages to MQTT, Allows modification via MQTT
-     */
-    MITM,
-};
+#define FrameChannel message::FrameBufferChannel
 
 namespace config {
 /**

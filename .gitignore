@@ -2,4 +2,5 @@
 
 /.pio
 /include/config.h
+/include/config/CustomConfiguration.h
 /.vscode

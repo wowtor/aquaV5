@@ -38,7 +38,7 @@ void loop()
     MqttTask::getInstance().loop();
 
     // handle serial interfaces
-    if (OPERATION_MODE == OperationMode::LISTENER) {
+    if (OPERATION_MODE == EOperationMode::V5_LISTENER) {
         SerialTask::getListenerInstance().loop();
     } else {
         SerialTask::getHMIInstance().loop();
@@ -69,7 +69,7 @@ void setup()
     MqttTask::getInstance().setup();
 
     // setup serial interfaces
-    if (OPERATION_MODE == OperationMode::LISTENER) {
+    if (OPERATION_MODE == EOperationMode::V5_LISTENER) {
         SerialTask::getListenerInstance().setup();
     } else {
         SerialTask::getHMIInstance().setup();
