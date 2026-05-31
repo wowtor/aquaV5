@@ -1,22 +1,20 @@
-#include "otahandler.h"
+#include "handler/OTA.h"
 
 #include <ArduinoOTA.h>
+#include <esp_task_wdt.h>
 
 #include "config/Configuration.h"
-#include "util.h"
-
 
 namespace aquamqtt
 {
 
 void OTAHandler::setup()  // NOLINT(*-convert-member-functions-to-static)
 {
-    LOG.println("[ota] setup...");
     // Port defaults to 3232
     // ArduinoOTA.setPort(3232);
 
     // Hostname defaults to esp3232-[MAC]
-    ArduinoOTA.setHostname(unique_device_id());
+    ArduinoOTA.setHostname(config::networkName);
 
     // No authentication by default
     // ArduinoOTA.setPassword("admin");
@@ -38,20 +36,21 @@ void OTAHandler::setup()  // NOLINT(*-convert-member-functions-to-static)
             })
             .onEnd([]() { Serial.println("\nEnd"); })
             .onProgress([](unsigned int progress, unsigned int total) {
-                LOG.printf("[ota] progress: %u%%\r", (progress / (total / 100)));
+                Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+                esp_task_wdt_reset();
             })
             .onError([](ota_error_t error) {
-                LOG.printf("Error[%u]: ", error);
+                Serial.printf("Error[%u]: ", error);
                 if (error == OTA_AUTH_ERROR)
-                    LOG.println("Auth Failed");
+                    Serial.println("Auth Failed");
                 else if (error == OTA_BEGIN_ERROR)
-                    LOG.println("Begin Failed");
+                    Serial.println("Begin Failed");
                 else if (error == OTA_CONNECT_ERROR)
-                    LOG.println("Connect Failed");
+                    Serial.println("Connect Failed");
                 else if (error == OTA_RECEIVE_ERROR)
-                    LOG.println("Receive Failed");
+                    Serial.println("Receive Failed");
                 else if (error == OTA_END_ERROR)
-                    LOG.println("End Failed");
+                    Serial.println("End Failed");
             });
 
     ArduinoOTA.begin();

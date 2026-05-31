@@ -3,10 +3,10 @@
 
 #include "config.h"
 
-#include "mode/v5/wifihandler.h"
+#include "handler/Wifi.h"
 #include "mode/v5/serialtask.h"
 #include "mode/v5/mqtttask.h"
-#include "mode/v5/otahandler.h"
+#include "handler/OTA.h"
 
 
 using namespace aquamqtt;

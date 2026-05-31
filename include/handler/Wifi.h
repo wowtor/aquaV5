@@ -5,26 +5,20 @@
 
 namespace aquamqtt
 {
-
 class WifiHandler final
 {
 public:
     static WifiHandler& getInstance();
 
-    WifiHandler(WifiHandler const&) = delete;
-    void operator=(WifiHandler const&) = delete;
-
+    bool connected() { return mConnectedToWifiWithValidIpAddress; };
     void setup();
     void loop();
 
-    const std::string getIPAddress();
-
-    bool connected();
-
 private:
     WifiHandler();
-    ~WifiHandler() = default;
+    virtual ~WifiHandler() = default;
 
+private:
     static void wifiCallback(WiFiEvent_t event);
 
     unsigned long mLastCheck;

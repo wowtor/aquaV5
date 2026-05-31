@@ -1,8 +1,6 @@
-#include "wifihandler.h"
+#include "handler/Wifi.h"
 
-#include "constants.h"
 #include "config/Configuration.h"
-
 
 namespace aquamqtt
 {
@@ -18,20 +16,8 @@ WifiHandler::WifiHandler() : mLastCheck(0)
 {
 }
 
-const std::string WifiHandler::getIPAddress()
-{
-    return WiFi.localIP().toString().c_str();
-}
-
-bool WifiHandler::connected()
-{
-    return mConnectedToWifiWithValidIpAddress;
-}
-
-
 void WifiHandler::setup()
 {
-    LOG.println("[wifi] setup...");
     WiFiClass::mode(WIFI_STA);
 
     // we don't trust the auto reconnect routine, as it seems there are edge cases where it does not work

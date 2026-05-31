@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include "config/Configuration.h"
-#include "wifihandler.h"
+#include "handler/Wifi.h"
 #include "util.h"
 
 
